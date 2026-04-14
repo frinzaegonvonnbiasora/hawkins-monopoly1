@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+@theme {
+  --font-newsreader: "Newsreader", serif;
+  --font-work-sans: "Work Sans", sans-serif;
+  --font-space-grotesk: "Space Grotesk", monospace;
+
+  --color-primary: #ffb3ac;
+  --color-primary-container: #e11322;
+  --color-on-primary-container: #fff5f4;
+  --color-surface: #131314;
+  --color-surface-container: #201f20;
+  --color-surface-container-high: #2a2a2b;
+  --color-surface-container-highest: #353436;
+  --color-surface-container-low: #1c1b1c;
+  --color-surface-container-lowest: #0e0e0f;
+  --color-outline-variant: #5e3f3c;
+  --color-tertiary: #b8c3ff;
+  --color-tertiary-container: #3861ff;
+  --color-error: #ffb4ab;
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Work+Sans:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&display=swap');
+
+  body {
+    @apply bg-surface text-white font-work-sans;
+  }
+}
+
+@layer utilities {
+  .crt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.2;
+  }
+
+  .grain-texture {
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    pointer-events: none;
+    z-index: 99;
+  }
+
+  .void-bg {
+    background: radial-gradient(circle at center, transparent 0%, #0e0e0f 100%);
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .property-card {
+    background: linear-gradient(180deg, rgba(30, 30, 30, 0.9), rgba(10, 10, 10, 0.95));
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(216, 216, 216, 0.08);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    position: relative;
+  }
+
+  .property-card-top {
+    height: 8px;
+    width: 100%;
+  }
+
+  .property-group-tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.62rem;
+    color: #f5f5f5;
+  }
+
+  .property-details .detail-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.4rem;
+    padding: 0.4rem;
+  }
+
+  .property-details .detail-title {
+    color: #a6a6a6;
+    letter-spacing: 0.06em;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+  }
+
+  .property-details .detail-value {
+    color: #fff;
+    font-weight: 700;
+    margin-top: 0.15rem;
+  }
+
+  .rent-grid .rent-step {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.35rem;
+    white-space: normal;
+    font-size: 0.62rem;
+  }
+
+  .title-deed-card {
+    border-radius: 0.5rem;
+    background-color: #fffdfa;
+    color: #111;
+    font-family: 'Times New Roman', serif;
+    border: 0.25rem solid #372b1f;
+    background-image: linear-gradient(90deg, rgba(255,240,210,0.16), rgba(255,255,255,0.05)), url('/assets/title-deed-paper-texture.png');
+    background-blend-mode: overlay;
+    background-size: cover;
+    position: relative;
+  }
+
+  .title-deed-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.08), rgba(0,0,0,0.03) 50%, rgba(0,0,0,0.08) 100%);
+  }
+
+  .title-deed-banner {
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px;
+    padding: 0.35rem 0.8rem;
+    border-bottom: 2px solid #000;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+  }
+
+  .title-deed-name {
+    z-index: 2;
+    color: #111;
+    font-family: 'Georgia', serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.95rem;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.75);
+  }
+
+  .title-deed-content {
+    z-index: 2;
+    position: relative;
+    color: #1a1a1a;
+    text-shadow: 0 0 0.2px rgba(255, 255, 255, 0.5);
+    background: rgba(255,255,255,0.85);
+    border-top: 1px solid rgba(0,0,0,0.15);
+  }
+
+  .title-deed-content div {
+    margin-bottom: 0.25rem;
+  }
+
+  .title-deed-content .rent-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+  }
+
+  .title-deed-content .rent-line .label {
+    font-weight: 700;
+  }
+
+  .title-deed-content .rent-line .value {
+    font-weight: 700;
+  }
+}
+
+

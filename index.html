@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawkins Monopoly | Multiplayer Board Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* Login Modal Styles */
+        #login-modal .modal-content {
+            max-width: 420px;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #login-modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        #login-modal .modal-header h2 {
+            font-family: 'Space Mono', monospace;
+            color: #e11d48;
+            letter-spacing: 0.2em;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        .login-body {
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .login-body input {
+            padding: 12px 14px;
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 4px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .login-body input:focus {
+            border-color: #e11d48;
+        }
+        .login-body input::placeholder {
+            color: #555;
+        }
+        #login-submit-btn {
+            padding: 13px;
+            background: #e11d48;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            margin-top: 4px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        #login-submit-btn:hover {
+            background: #be123c;
+            transform: translateY(-1px);
+        }
+        #login-submit-btn:active {
+            transform: translateY(0);
+        }
+        .login-footer-text {
+            text-align: center;
+            color: #555;
+            font-size: 0.8rem;
+            font-family: 'Space Mono', monospace;
+            margin: 0;
+        }
+        .login-footer-text a {
+            color: #e11d48;
+            text-decoration: none;
+        }
+        .login-footer-text a:hover {
+            text-decoration: underline;
+        }
+        .login-divider {
+            border: none;
+            border-top: 1px solid #222;
+            margin: 4px 0;
+        }
+        .login-error {
+            color: #e11d48;
+            font-size: 0.78rem;
+            font-family: 'Space Mono', monospace;
+            display: none;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        /* Tab Styles */
+        .login-tabs {
+            display: flex;
+            border-bottom: 1px solid #222;
+            margin-bottom: 20px;
+        }
+        .login-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            color: #555;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .login-tab.active {
+            color: #e11d48;
+            border-bottom: 2px solid #e11d48;
+            background: rgba(225, 29, 72, 0.05);
+        }
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            transition: opacity 0.2s;
+        }
+        .google-btn:hover {
+            opacity: 0.9;
+        }
+        .google-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Stranger Things CRT Overlays -->
+    <div class="vignette-overlay"></div>
+    <div class="scanlines-overlay"></div>
+    <div id="notifications"></div>
+
+    <!-- All Rooms Modal -->
+    <div id="rooms-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>ACTIVE ROOMS</h2>
+                <button class="close-modal" id="close-rooms-btn">&times;</button>
+            </div>
+            <div id="rooms-list-container" class="rooms-list">
+                <p>Loading rooms...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="login-modal-title">// LOGIN</h2>
+                <button class="close-modal" id="close-login-btn">&times;</button>
+            </div>
+            <div class="login-tabs">
+                <div class="login-tab active" id="tab-login">SIGN IN</div>
+                <div class="login-tab" id="tab-register">REGISTER</div>
+            </div>
+            <div class="login-body">
+                <button class="google-btn" id="google-login-btn">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                <div style="text-align: center; color: #333; font-size: 0.7rem; margin-bottom: 10px; font-family: 'Space Mono', monospace;">OR EMAIL</div>
+                <input type="email" id="login-email" placeholder="Email address">
+                <input type="password" id="login-password" placeholder="Password">
+                <p class="login-error" id="login-error-msg"></p>
+                <button id="login-submit-btn">SIGN IN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The React App will mount here -->
+    <div id="root" style="position: relative; z-index: 99999;"></div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, update, onValue, push, child, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBf0J4jOd5T0nIgt62ZvI1PDaRcX7we-Tk",
+            authDomain: "hawkins-monopoly1.firebaseapp.com",
+            databaseURL: "https://hawkins-monopoly1-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hawkins-monopoly1",
+            storageBucket: "hawkins-monopoly1.firebasestorage.app",
+            messagingSenderId: "414215274090",
+            appId: "1:414215274090:web:09520192bf6cbb665cd413"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        window.fbAuth = { 
+            auth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            signInWithPopup, 
+            googleProvider, 
+            onAuthStateChanged,
+            signOut
+        };
+
+        window.fbDB = {
+            db, ref, set, get, update, onValue, push, child, remove, runTransaction
+        };
+
+        // Listen for auth state changes
+        onAuthStateChanged(auth, (user) => {
+            const navLogin = document.getElementById('nav-login');
+            if (user) {
+                console.log("User is signed in:", user.displayName || user.email);
+                // Auto-fill name input
+                const nameInput = document.getElementById('landing-name-input');
+                if (nameInput) {
+                    nameInput.value = user.displayName || user.email.split('@')[0];
+                }
+                // Update login button to show logout
+                if (navLogin) {
+                    navLogin.innerText = "LOGOUT";
+                }
+            } else {
+                console.log("No user signed in");
+                if (navLogin) {
+                    navLogin.innerText = "LOGIN";
+                }
+            }
+        });
+    </script>
+
+
+    <!-- Main Landing Page -->
+    <div id="landing-page" class="landing-page">
+        <!-- Top Navbar -->
+        <header class="navbar">
+            <div class="nav-left">
+                <div class="mini-logo">
+                    <svg viewBox="0 0 100 100" class="d20-svg small">
+                        <path d="M50 2 L95 25 L95 75 L50 98 L5 75 L5 25 Z" fill="none" stroke="currentColor" stroke-width="4"/>
+                        <text x="50" y="62" font-family="Inter" font-weight="900" font-size="30" text-anchor="middle" fill="currentColor">11</text>
+                    </svg>
+                    <span class="logo-text">HAWKINS MONOPOLY</span>
+                </div>
+            </div>
+            <nav class="nav-right">
+                <div id="server-status" title="Connecting to Multiplayer..." style="width:12px;height:12px;border-radius:50%;background:#f59e0b;margin-right:15px;box-shadow:0 0 5px currentColor"></div>
+                <button class="nav-link" id="nav-rooms">All Rooms</button>
+                <button class="nav-link" id="nav-create">Create Private Game</button>
+                <button class="nav-btn-login" id="nav-login">LOGIN</button>
+            </nav>
+        </header>
+
+        <!-- Main Hero Section -->
+        <main class="hero-section">
+            <div class="upside-down-effects">
+                <div class="mist"></div>
+                <div id="spores-container"></div>
+            </div>
+
+            <!-- Christmas Lights -->
+            <div class="christmas-lights">
+                <div class="lights-wire" id="lights-wire"></div>
+            </div>
+            
+            <div class="hero-content">
+                <div class="logo-container">
+                    <div class="d20-logo">
+                        <svg viewBox="0 0 100 100" class="d20-svg">
+                            <path d="M50 2 L95 25 L95 75 L50 98 L5 75 L5 25 Z" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M50 2 L50 98 M5 25 L95 25 M5 75 L95 75 M5 25 L50 50 L95 25 M5 75 L50 50 L95 75" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+                            <text x="50" y="62" font-family="Inter" font-weight="900" font-size="30" text-anchor="middle" fill="currentColor">11</text>
+                        </svg>
+                    </div>
+                    <h1 class="game-title">HAWKINS<br>MONOPOLY</h1>
+                    <p class="hero-subtitle">Survive the board. Rule the void.</p>
+                </div>
+
+                <div class="hero-actions">
+                    <div class="name-input-group">
+                        <input type="text" id="landing-name-input" placeholder="Generating name..." maxlength="20">
+                        <button id="randomize-name-btn" title="Randomize Name">🎲</button>
+                    </div>
+                    <button id="landing-play-btn" class="neon-play-btn">
+                        <span class="play-icon">≫</span> PLAY
+                    </button>
+                </div>
+
+                <div class="floating-icons-row">
+                    <div class="f-icon walkie">📟</div>
+                    <div class="f-icon waffles">🧇</div>
+                    <div class="f-icon bike">🚲</div>
+                    <div class="f-icon bat">🏏</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Instructions Footer -->
+        <footer class="landing-footer">
+            <div class="instructions-grid">
+                <div class="inst-card">
+                    <span class="inst-icon">💰</span>
+                    <h3>Start Cash</h3>
+                    <p>Begin your journey with $1500. Manage it wisely to build your empire.</p>
+                </div>
+                <div class="inst-card">
+                    <span class="inst-icon">🎲</span>
+                    <h3>Dice Rules</h3>
+                    <p>Roll two dice to move. Doubles grant extra turns, but 3 sets send you to Jail.</p>
+                </div>
+                <div class="inst-card">
+                    <span class="inst-icon">🏠</span>
+                    <h3>Properties</h3>
+                    <p>Own color groups to double rent. Build houses and hotels to bankrupt rivals.</p>
+                </div>
+                <div class="inst-card">
+                    <span class="inst-icon">🏆</span>
+                    <h3>Victory</h3>
+                    <p>Be the last player standing after others go bankrupt to claim your win.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Lobby Screen (Initially Hidden) -->
+    <!-- Game & Lobby Container (shared side panel) -->
+    <div id="main-game-container" class="screen hidden">
+        <div class="game-layout">
+            <!-- Left Side: Persistent UI Panel (Players, Logs, Chat) -->
+            <aside class="ui-panel">
+                <div class="card">
+                    <div class="room-info">
+                        <span>Code: <span id="room-display" class="room-id">-</span> <button id="copy-room-btn" class="mini-btn">📋</button></span>
+                    </div>
+                    <div id="player-list" class="players-list"></div>
+                </div>
+
+                <div class="card log-card">
+                    <div class="log-title">Game Log</div>
+                    <div id="game-log" class="log-content"></div>
+                </div>
+
+                <div class="card chat-card">
+                    <div class="chat-header">Chat</div>
+                    <div id="chat-messages" class="chat-content"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Type a message...">
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Middle Side: Toggle between Lobby and Board -->
+            <div class="game-main-content">
+                <div id="lobby-view" class="lobby-container">
+                    <div class="lobby-box">
+                        <h1>Game Lobby</h1>
+                        <p class="lobby-hint">Choose your character and wait for everyone to be READY.</p>
+                        
+                        <!-- Character Selector -->
+                        <div id="character-selector" class="character-grid">
+                            <!-- Populated via JS -->
+                        </div>
+
+                        <div class="lobby-actions">
+                            <!-- Lobby specific actions if needed -->
+                        </div>
+                    </div>
+                </div>
+                <div id="board-view" class="board-wrapper hidden">
+                    <div id="monopoly-board" class="board">
+                        <div id="tokens-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Action Panel -->
+            <aside class="ui-panel action-panel-side">
+                <div class="card action-card">
+                    <div id="turn-status" class="turn-status">Waiting for game to start...</div>
+                    
+                    <!-- Auction Panel -->
+                    <div id="auction-panel" class="auction-box hidden">
+                        <h4 id="auction-title">Auction</h4>
+                        <div class="bid-info">
+                            <span>Highest Bid: $<span id="highest-bid">0</span></span>
+                            <span>By: <span id="highest-bidder">None</span></span>
+                        </div>
+                        <div class="bid-controls">
+                            <input type="number" id="bid-input" value="100" step="10">
+                            <button id="place-bid-btn">BID</button>
+                            <button id="fold-btn" class="secondary">FOLD</button>
+                        </div>
+                    </div>
+
+                    <div class="button-group" id="game-controls">
+                        <button id="buy-btn" class="phase-btn hidden">🏠 Buy Property</button>
+                        <button id="pass-btn" class="phase-btn hidden">⏭️ Pass</button>
+                        <button id="trade-btn" class="phase-btn hidden">🤝 Trade</button>
+                        <button id="roll-btn" class="phase-btn hidden">🎲 ROLL THE DICE</button>
+                        <button id="end-turn-btn" class="phase-btn hidden">🔚 End Turn</button>
+                        <button id="ready-btn">Ready</button>
+                    </div>
+                    <button id="start-game-btn" class="hidden">Start Game</button>
+                </div>
+
+                <!-- Card Decks Display -->
+                <div class="card decks-card">
+                    <div class="deck-title">Game Decks</div>
+                    <div class="decks-container">
+                        <div class="deck-item cerebro-deck">
+                            <div class="deck-visual"></div>
+                            <span>Cerebro</span>
+                        </div>
+                        <div class="deck-item upside-down-deck">
+                            <div class="deck-visual"></div>
+                            <span>Hellfire Club</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bank / Currency Display -->
+                <div class="card bank-card">
+                    <div class="deck-title">Bank / Currency</div>
+                    <div class="currency-list" id="currency-display"></div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Legacy Lobby Screen (keep for back button/input but we use main-game-container mostly) -->
+    <div id="lobby-screen" class="screen full-screen-overlay hidden">
+        <div class="lobby-container">
+            <button class="back-btn" id="lobby-back-btn">← Back to Menu</button>
+            <div class="lobby-box">
+                <h1>Create / Join Room</h1>
+                <input type="text" id="player-name" placeholder="Enter your name">
+                <div class="game-settings card">
+                    <h3>Host Settings</h3>
+                    <div class="setting-row">
+                        <label>Start Cash: $</label>
+                        <input type="number" id="setting-cash" value="1500" step="100">
+                    </div>
+                </div>
+                <div class="lobby-actions">
+                    <button id="create-room-btn">Create New Game</button>
+                    <div class="join-box">
+                        <input type="text" id="room-id-input" placeholder="Room ID">
+                        <button id="join-room-btn">Join</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="trade-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="trade-modal-title">Offer Trade</h2>
+            <div id="trade-offer-display" class="trade-offer-details hidden">
+                <div class="trade-offer-text"></div>
+            </div>
+            <div class="trade-setup" id="trade-setup-area">
+                <div class="trade-column">
+                    <h3>To Player:</h3>
+                    <select id="trade-player-select"></select>
+                </div>
+                <div class="trade-grid">
+                    <div class="trade-offer">
+                        <h4>You Give:</h4>
+                        <input type="number" id="trade-cash-offered" placeholder="Cash amount" value="0" min="0">
+                        <div id="trade-props-offered" class="prop-selector"></div>
+                    </div>
+                    <div class="trade-request">
+                        <h4>You Get:</h4>
+                        <input type="number" id="trade-cash-requested" placeholder="Cash amount" value="0" min="0">
+                        <div id="trade-props-requested" class="prop-selector"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="send-trade-btn">Send Offer</button>
+                <button id="accept-trade-btn" class="hidden">Accept Trade</button>
+                <button id="reject-trade-btn" class="hidden secondary">Reject</button>
+                <button id="cancel-trade-btn" class="secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Title Deed Overlay (positioned near tile) -->
+    <div id="deed-overlay" class="deed-overlay hidden">
+        <div class="deed-card">
+            <div class="deed-vines deed-vines-top"></div>
+            <div class="deed-vines deed-vines-bottom"></div>
+            <div class="deed-vines deed-vines-left"></div>
+            <div class="deed-vines deed-vines-right"></div>
+            <div class="deed-inner">
+                <div class="deed-title-bar" id="deed-title-bar">
+                    <h2 id="deed-property-name">PROPERTY NAME</h2>
+                </div>
+                <div class="deed-body">
+                    <div class="deed-rent-row deed-base-rent">
+                        <span>RENT</span>
+                        <span id="deed-rent-base">$0</span>
+                    </div>
+                    <div class="deed-rent-row">
+                        <span>With 1 House</span>
+                        <span id="deed-rent-1">$0</span>
+                    </div>
+                    <div class="deed-rent-row">
+                        <span>With 2 Houses</span>
+                        <span id="deed-rent-2">$0</span>
+                    </div>
+                    <div class="deed-rent-row">
+                        <span>With 3 Houses</span>
+                        <span id="deed-rent-3">$0</span>
+                    </div>
+                    <div class="deed-rent-row">
+                        <span>With 4 Houses</span>
+                        <span id="deed-rent-4">$0</span>
+                    </div>
+                    <div class="deed-rent-row deed-hotel-rent">
+                        <span>With HIDEOUT</span>
+                        <span id="deed-rent-hotel">$0</span>
+                    </div>
+                    <div class="deed-divider"></div>
+                    <div class="deed-cost-row">
+                        <span>Houses cost</span>
+                        <span id="deed-house-cost">$0 each</span>
+                    </div>
+                    <div class="deed-cost-row">
+                        <span>HIDEOUT cost</span>
+                        <span id="deed-hotel-cost">$0 + 4 Houses</span>
+                    </div>
+                    <div class="deed-divider"></div>
+                    <div class="deed-cost-row deed-mortgage-row">
+                        <span>Mortgage Value</span>
+                        <span id="deed-mortgage-value">$0</span>
+                    </div>
+                    <div id="deed-owner-info" class="deed-owner-info"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Draw Modal -->
+    <div id="card-modal" class="modal hidden">
+        <div class="modal-content card-draw-content">
+            <div id="card-image-container" class="card-image-view"></div>
+            <div class="card-draw-info">
+                <h2 id="card-type-title">HELLFIRE CLUB</h2>
+                <p id="card-description-text"></p>
+                <button id="close-card-btn">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal Logic -->
+    <script>
+        (function () {
+            const loginModal  = document.getElementById('login-modal');
+            const landingPage = document.getElementById('landing-page');
+            const loginBtn    = document.getElementById('nav-login');
+            const closeBtn    = document.getElementById('close-login-btn');
+            const submitBtn   = document.getElementById('login-submit-btn');
+            const errorMsg    = document.getElementById('login-error-msg');
+            const googleBtn   = document.getElementById('google-login-btn');
+            const tabLogin    = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const modalTitle  = document.getElementById('login-modal-title');
+            
+            let isRegisterMode = false;
+
+            // Helper: open / close
+            function openLogin() {
+                loginModal.classList.remove('hidden');
+            }
+            function closeLogin() {
+                loginModal.classList.add('hidden');
+                errorMsg.style.display = 'none';
+                // Restore landing page if it was hidden
+                if (landingPage.style.display === 'none') {
+                    landingPage.style.display = '';
+                }
+            }
+
+            // Tab switching
+            tabLogin.onclick = () => {
+                isRegisterMode = false;
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+                submitBtn.innerText = 'SIGN IN';
+                modalTitle.innerText = '// LOGIN';
+            };
+            tabRegister.onclick = () => {
+                isRegisterMode = true;
+                tabRegister.classList.add('active');
+                tabLogin.classList.remove('active');
+                submitBtn.innerText = 'REGISTER';
+                modalTitle.innerText = '// REGISTER';
+            };
+
+            // LOGIN/LOGOUT button click
+            loginBtn.addEventListener('click', function () {
+                const { auth, signOut } = window.fbAuth;
+                if (auth.currentUser) {
+                    // Sign out if already logged in
+                    signOut(auth).then(() => {
+                        console.log("User signed out");
+                    }).catch(err => {
+                        console.error("Sign out error:", err);
+                    });
+                } else {
+                    // Open modal if not logged in
+                    openLogin();
+                }
+            });
+
+            // Listen for the SHOW_LOGIN event
+            window.addEventListener('SHOW_LOGIN', openLogin);
+
+            // Close button
+            closeBtn.addEventListener('click', closeLogin);
+
+            // Click outside modal to close
+            loginModal.addEventListener('click', function (e) {
+                if (e.target === loginModal) closeLogin();
+            });
+
+            // Google login
+            googleBtn.onclick = async () => {
+                try {
+                    const { auth, signInWithPopup, googleProvider } = window.fbAuth;
+                    await signInWithPopup(auth, googleProvider);
+                    closeLogin();
+                } catch (err) {
+                    errorMsg.textContent = err.message;
+                    errorMsg.style.display = 'block';
+                }
+            };
+
+            // Submit — hook into Firebase
+            submitBtn.addEventListener('click', async function () {
+                const email    = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value;
+
+                if (!email || !password) {
+                    errorMsg.textContent = 'Please fill in both fields.';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } = window.fbAuth;
+                    if (isRegisterMode) {
+                        await createUserWithEmailAndPassword(auth, email, password);
+                    } else {
+                        await signInWithEmailAndPassword(auth, email, password);
+                    }
+                    closeLogin();
+                } catch (err) {
+                    errorMsg.textContent = err.message;
+                    errorMsg.style.display = 'block';
+                }
+            });
+
+            // Enter key submits
+            document.getElementById('login-password').addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') submitBtn.click();
+            });
+        })();
+    </script>
+
+    <script type="module" src="script.js"></script>
+    <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>
